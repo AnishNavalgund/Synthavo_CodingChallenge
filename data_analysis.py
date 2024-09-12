@@ -39,6 +39,11 @@ def analyze_data():
 
     files = load_files(DATA_DIR) # load in files
     stats_df = calculate_statistics_for_files(files) # calculate statistics
+
+    pd.set_option('display.max_rows', None)  # Show all rows
+    pd.set_option('display.max_columns', None)  # Show all columns
+    pd.set_option('display.width', None)  # Set the width of the display
+    pd.set_option('display.colheader_justify', 'center')  # Center column headers
     print(stats_df) # print statistics
     
 if __name__ == "__main__":
