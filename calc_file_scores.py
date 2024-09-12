@@ -3,6 +3,9 @@ import pandas as pd
 import random
 import numpy as np
 from scipy.spatial.distance import pdist, squareform
+from sklearn.cluster import KMeans
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
 
 
 def load_files(path):
@@ -28,31 +31,21 @@ def calculate_statistics(files):
         statistics_data.append(stat)
     return pd.DataFrame(statistics_data)
 
-# calculate pairwise Euclideandistances 
-def calculate_distance_matrix(stats_df):
-    stats_array = stats_df[['mean', 'std', 'skew', 'kurtosis', 'variance']].values
-    return squareform(pdist(stats_array, metric='euclidean'))
-
-def filter_files(files, distance_matrix):
-    selected_indices = set()
+def filter_files(files, iteration=0, last_scores=0, last_selections=None):
+    selected_files = []
     
-    # Get the indices that sort the flattened distance matrix
-    sorted_indices = np.argsort(distance_matrix.ravel())
+    # calcute the variance for each file
+    file_variances = [(i, df.var().mean()) for i, df in enumerate(files)]
     
-    #  small distabce files 
-    for flat_idx in sorted_indices[:9*len(files)//10]:
-        i, j = np.unravel_index(flat_idx, distance_matrix.shape)
-        selected_indices.add(i)
-        selected_indices.add(j)
+    # Sort file by  variance
+    file_variances.sort(key=lambda x: x[1])
     
-    #  large distance files
-    for flat_idx in sorted_indices[-4*len(files)//10:]:
-        i, j = np.unravel_index(flat_idx, distance_matrix.shape)
-        selected_indices.add(i)
-        selected_indices.add(j)
+    # Choose the top 95% of files 
+    num_files_to_select = int(0.994 * len(file_variances))  # 95% of files
+    selected_indices = [file_variances[i][0] for i in range(num_files_to_select)]
     
     # Print how many files are selected
-    print(f"Number of selected files: {len(selected_indices)}")
+    print(f"Number of selected files based on variance: {len(selected_indices)}")
     
     # Return the selected files
     return [files[i] for i in selected_indices]
@@ -68,15 +61,14 @@ def main():
     # The summation of cost and score should stay the same
     # modification for error handling / checking data is of course allowed here as well
     files = load_files("./data")
-    stats_df = calculate_statistics(files)  
-    distance_matrix = calculate_distance_matrix(stats_df)  
+ 
     total_cost = 0
     top_score = 0
 
     last_scores = []
     last_selections = []
     while top_score < 88 and total_cost < 100000:
-        file_selection = filter_files(files, distance_matrix) # filter_files(files, last_scores=last_scores, last_selections=last_selections)
+        file_selection = filter_files(files, iteration=len(last_scores), last_scores=last_scores, last_selections=last_selections)
         score, cost = run_classification(file_selection)
         top_score = max(top_score, score)
         total_cost += cost

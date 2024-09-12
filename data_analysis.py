@@ -50,7 +50,7 @@ def plot_statistics(df):
 
     plt.subplot(2, 2, 3)
     sns.histplot(df['variance'], kde=True, color='red', bins=20)
-    plt.title('Distribution of Variance')
+    plt.title('Distribution of Variance ')
 
     plt.subplot(2, 2, 4)
     sns.histplot(df['kurtosis'], kde=True, color='purple', bins=20)
@@ -68,6 +68,8 @@ def analyze_data():
     stats_df.to_csv('overall_statistics.csv', index=False)
     print(stats_df) # print statistics
     plot_statistics(stats_df) # plot statistics
+
     
 if __name__ == "__main__":
     analyze_data()
+
