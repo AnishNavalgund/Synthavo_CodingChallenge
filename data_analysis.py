@@ -1,6 +1,8 @@
 import os
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 # data path
 DATA_DIR = './data'
@@ -34,6 +36,29 @@ def calculate_statistics_for_files(files):
     print(f"Calculated statistics for {len(statistics_data)} files.")
     return pd.DataFrame(statistics_data)
 
+def plot_statistics(df):
+    plt.figure(figsize=(12, 8))
+
+    # Plot mean, std, variance
+    plt.subplot(2, 2, 1)
+    sns.histplot(df['mean'], kde=True, color='blue', bins=20)
+    plt.title('Distribution of Mean ')
+
+    plt.subplot(2, 2, 2)
+    sns.histplot(df['std'], kde=True, color='green', bins=20)
+    plt.title('Distribution of SD')
+
+    plt.subplot(2, 2, 3)
+    sns.histplot(df['variance'], kde=True, color='red', bins=20)
+    plt.title('Distribution of Variance')
+
+    plt.subplot(2, 2, 4)
+    sns.histplot(df['kurtosis'], kde=True, color='purple', bins=20)
+    plt.title('Distribution of Kurtosis')
+
+    plt.tight_layout()
+    plt.show()
+
 # analzyew data
 def analyze_data():
 
@@ -42,6 +67,7 @@ def analyze_data():
 
     stats_df.to_csv('overall_statistics.csv', index=False)
     print(stats_df) # print statistics
+    plot_statistics(stats_df) # plot statistics
     
 if __name__ == "__main__":
     analyze_data()
